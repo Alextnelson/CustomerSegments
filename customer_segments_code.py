@@ -37,17 +37,33 @@ print("Chosen samples of wholesale customers dataset: ")
 display(samples)
 
 # Copied the DataFrame, using the 'drop' function to drop the given feature
-new_data = pd.DataFrame(data).drop('Fresh', axis=1)
-print(new_data.head())
+detergents = data.loc[:,'Detergents_Paper']
+new_data = pd.DataFrame(data).drop('Detergents_Paper', axis=1)
 
 # Split the data into training and testing sets using the given feature as the target
-X_train, X_test, y_train, y_test = (None, None, None, None)
+from sklearn.model_selection import train_test_split
 
-# TODO: Create a decision tree regressor and fit it to the training set
-regressor = None
+features = new_data
+target = detergents
+X_train, X_test, y_train, y_test = train_test_split(features, target, test_size=0.25, random_state=0)
 
-# TODO: Report the score of the prediction using the testing set
-score = None
+# Created a decision tree regressor and fit it to the training set
+from sklearn.tree import DecisionTreeRegressor
+regressor = DecisionTreeRegressor()
+regressor.fit(X_train, y_train)
 
+# Score of the prediction using the testing set
+score = regressor.score(X_test, y_test)
+print(score)
 
-df.drop('column_name', axis=1, inplace=True)
+# Produce a scatter matrix for each pair of features in the data
+pd.scatter_matrix(data, alpha = 0.3, figsize = (14,8), diagonal = 'kde');
+
+# TODO: Scale the data using the natural logarithm
+log_data = None
+
+# TODO: Scale the sample data using the natural logarithm
+log_samples = None
+
+# Produce a scatter matrix for each pair of newly-transformed features
+pd.scatter_matrix(log_data, alpha = 0.3, figsize = (14,8), diagonal = 'kde');
