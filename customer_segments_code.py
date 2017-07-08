@@ -189,5 +189,6 @@ display(true_centers)
 for i, pred in enumerate(sample_preds):
     print("Sample point", i, "predicted to be in Cluster", pred)
 
-
+# Display the clustering results based on 'Channel' data
+vs.channel_results(reduced_data, outliers, pca_samples)
 
