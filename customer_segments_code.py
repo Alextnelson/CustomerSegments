@@ -37,6 +37,9 @@ samples = pd.DataFrame(data.loc[indices, :], columns = data.keys()).reset_index(
 print("Chosen samples of wholesale customers dataset: ")
 display(samples)
 
+print("Comparison of data mean values to sample values across product categories:")
+display(samples - np.around(data.mean().values))
+
 # Copied the DataFrame, using the 'drop' function to drop the given feature
 detergents = data.loc[:,'Detergents_Paper']
 new_data = pd.DataFrame(data).drop('Detergents_Paper', axis=1)
@@ -70,6 +73,7 @@ log_samples = np.log(samples)
 pd.scatter_matrix(log_data, alpha = 0.3, figsize = (14,8), diagonal = 'kde')
 
 # For each feature find the data points with extreme high or low values
+indices_outliers = []
 for feature in log_data.keys():
     
     # Calculate Q1 (25th percentile of the data) for the given feature
@@ -81,26 +85,26 @@ for feature in log_data.keys():
     # Use the interquartile range to calculate an outlier step (1.5 times the interquartile range)
     step = (Q3 - Q1) * 1.5
     
-    # Display the outliers
+    indices_outliers.append(log_data[~((log_data[feature] >= Q1 - step) & (log_data[feature] <= Q3 + step))].index.get_values())
+    
+    # Display the outliers as a check on for loop
     print("Data points considered outliers for the feature '{}':".format(feature))
     display(log_data[~((log_data[feature] >= Q1 - step) & (log_data[feature] <= Q3 + step))])
-    
-    
-    
-# Select the indices for data points you wish to remove
-outliers  = log_data[~((log_data[feature] >= Q1 - step) & (log_data[feature] <= Q3 + step))].index.get_values()
+
+# Create outliers list with values that appear more than once in product categories
+combined_indices_outliers = [item for sublist in indices_outliers for item in sublist]
+outliers_for_exclusion = list(set([x for x in combined_indices_outliers if combined_indices_outliers.count(x) > 1]))
 
 # Remove the outliers, if any were specified
-good_data = log_data.drop(log_data.index[outliers]).reset_index(drop = True)
-good_data.head()
-
+good_data = log_data.drop(log_data.index[outliers_for_exclusion]).reset_index(drop = True)
+display(good_data.head())
 
 # Apply PCA by fitting the good data with the same number of dimensions as features
 pca = PCA(n_components=6)
 pca.fit(good_data)
 
 # Transform log_samples using the PCA fit above
-pca_samples = pca.fit_transform(log_samples)
+pca_samples = pca.transform(log_samples)
 
 # Generate PCA results plot
 pca_results = vs.pca_results(good_data, pca)
